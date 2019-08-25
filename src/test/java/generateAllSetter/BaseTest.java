@@ -15,6 +15,11 @@
 package generateAllSetter;
 
 import com.intellij.testFramework.fixtures.LightCodeInsightFixtureTestCase;
+import org.apache.commons.io.IOUtils;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
 /**
  * @author bruce ge
@@ -28,6 +33,15 @@ public abstract class BaseTest extends LightCodeInsightFixtureTestCase {
 
     @Override
     protected String getTestDataPath() {
-        return "src/test/resources/testData";
+        return "src/test/resources/generateAllSetter";
+    }
+
+    String loadBeforeFile(Class<?> clazz, String fileName) {
+        InputStream inputStream = clazz.getResourceAsStream("before/Article.java");
+        try {
+            return IOUtils.toString(inputStream, StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new IllegalStateException("Unable to load file: " + fileName, e);
+        }
     }
 }

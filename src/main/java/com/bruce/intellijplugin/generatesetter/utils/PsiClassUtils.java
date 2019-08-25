@@ -17,6 +17,7 @@ package com.bruce.intellijplugin.generatesetter.utils;
 import com.bruce.intellijplugin.generatesetter.actions.GenerateAllSetterAction;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiMethod;
+import com.intellij.psi.PsiModifier;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -28,7 +29,7 @@ import java.util.List;
  * @Description
  */
 public class PsiClassUtils {
-    public static boolean isNotSystemClass(PsiClass psiClass) {
+    private static boolean isNotSystemClass(PsiClass psiClass) {
         if (psiClass == null) {
             return false;
         }
@@ -40,15 +41,15 @@ public class PsiClassUtils {
     }
 
     public static boolean isValidSetMethod(PsiMethod m) {
-        return m.hasModifierProperty("public") && !m.hasModifierProperty("static") && m.getName().startsWith("set");
+        return m.hasModifierProperty(PsiModifier.PUBLIC) && !m.hasModifierProperty(PsiModifier.STATIC) && m.getName().startsWith("set");
     }
 
-    public static boolean isValidGetMethod(PsiMethod m) {
-        return m.hasModifierProperty("public") && !m.hasModifierProperty("static") &&
+    private static boolean isValidGetMethod(PsiMethod m) {
+        return m.hasModifierProperty(PsiModifier.PUBLIC) && !m.hasModifierProperty(PsiModifier.STATIC) &&
                 (m.getName().startsWith(GenerateAllSetterAction.GET) || m.getName().startsWith(GenerateAllSetterAction.IS));
     }
 
-    public static void addSetMethodToList(PsiClass psiClass, List<PsiMethod> methodList) {
+    private static void addSetMethodToList(PsiClass psiClass, List<PsiMethod> methodList) {
         PsiMethod[] methods = psiClass.getMethods();
         for (PsiMethod method : methods) {
             if (isValidSetMethod(method)) {
@@ -57,7 +58,7 @@ public class PsiClassUtils {
         }
     }
 
-    public static void addGettMethodToList(PsiClass psiClass, List<PsiMethod> methodList) {
+    private static void addGettMethodToList(PsiClass psiClass, List<PsiMethod> methodList) {
         PsiMethod[] methods = psiClass.getMethods();
         for (PsiMethod method : methods) {
             if (isValidGetMethod(method)) {

@@ -32,7 +32,7 @@ intellij {
 //    IC-2016.1
     version 'IU-2018.3' //IntelliJ IDEA dependency
     plugins 'coverage' //Bundled plugin dependencies
-    pluginName 'GenerateAllSetter'
+    pluginName 'ImprovedGenerateAllSetter'
     updateSinceUntilBuild false
 //    需要来填写publish这块 类似
 //    publish {
@@ -48,8 +48,9 @@ dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.11'
     // https://mvnrepository.com/artifact/org.assertj/assertj-core
     testCompile group: 'org.assertj', name: 'assertj-core', version: '3.12.2'
+    compile group: 'commons-io', name: 'commons-io', version: '2.6'
 
 }
 
 group 'com.bruce.intellijplugin'
-version '2.4'
+version '2.5'

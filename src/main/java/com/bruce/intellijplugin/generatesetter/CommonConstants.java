@@ -15,11 +15,13 @@
 package com.bruce.intellijplugin.generatesetter;
 
 /**
- * @author bruce ge
+ * @author bruce ge & Mateusz Nalepa
  */
 public class CommonConstants {
     public static final String GENERATE_SETTER_METHOD = "Generate all setter with default value";
     public static final String GENERATE_SETTER_METHOD_NO_DEAULT_VALUE = "Generate all setter no default value";
     public static final String ASSERTALLPROPS = "Assert all getters";
-    public static final String GENERATE_CONVERTER_FROM_METHOD = "Generate setter getter converter";
+    public static final String GENERATE_GETTER_SETTER_CONVERTER_FROM_METHOD = "Generate setter getter converter";
+    public static final String GENERATE_GETTER_SETTER_USING_DOT_CONVERTER_FROM_METHOD = "Generate setter getter using dot converter";
+    public static final String GENERATE_GETTER_SETTER_USING_WITH_CONVERTER_FROM_METHOD = "Generate setter getter using with converter";
 }

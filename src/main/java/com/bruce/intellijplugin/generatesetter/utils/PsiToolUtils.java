@@ -86,13 +86,7 @@ public class PsiToolUtils {
 
     public static void addImportToFile(PsiDocumentManager psiDocumentManager, PsiJavaFile containingFile, Document document, Set<String> newImportList) {
         if (newImportList.size() > 0) {
-            Iterator<String> iterator = newImportList.iterator();
-            while (iterator.hasNext()) {
-                String u = iterator.next();
-                if (u.startsWith("java.lang")) {
-                    iterator.remove();
-                }
-            }
+            newImportList.removeIf(u -> u.startsWith("java.lang"));
         }
 
         if (newImportList.size() > 0) {

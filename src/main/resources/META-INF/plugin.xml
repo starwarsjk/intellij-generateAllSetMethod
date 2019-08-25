@@ -1,6 +1,6 @@
 <idea-plugin version="2">
     <id>com.bruce.intellijplugin.generatesetter</id>
-    <name>GenerateAllSetter</name>
+    <name>ImprovedGenerateAllSetter</name>
     <vendor email="gejun123456@gmail.com" url="https://github.com/gejun123456/intellij-generateAllSetMethod">bruceGe</vendor>
 
     <description><![CDATA[
@@ -23,6 +23,11 @@
     ]]></description>
 
     <change-notes><![CDATA[
+        <strong>2.5</strong>
+        <ul>
+            <li>[NEW] add generater getter setter using with notation</li>
+            <li>[NEW] add generater getter setter using dot notation</li>
+        </ul>
         <strong>2.4</strong>
         <ul>
             <li>[FIX]fix Generate from method getter setter converter not work</li>
@@ -110,6 +115,14 @@
 
         <intentionAction>
             <className>com.bruce.intellijplugin.generatesetter.actions.GenerateSetterGetterFromFunctionAction</className>
+        </intentionAction>
+
+        <intentionAction>
+            <className>com.bruce.intellijplugin.generatesetter.actions.GenerateSetterGetterUsingDotFromFunctionAction</className>
+        </intentionAction>
+
+        <intentionAction>
+            <className>com.bruce.intellijplugin.generatesetter.actions.GenerateSetterGetterUsingWithFromFunctionAction</className>
         </intentionAction>
     </extensions>
 </idea-plugin>

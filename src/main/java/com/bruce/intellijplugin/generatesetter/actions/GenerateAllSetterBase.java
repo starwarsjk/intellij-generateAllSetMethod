@@ -17,7 +17,11 @@ package com.bruce.intellijplugin.generatesetter.actions;
 import com.bruce.intellijplugin.generatesetter.CommonConstants;
 import com.bruce.intellijplugin.generatesetter.GetInfo;
 import com.bruce.intellijplugin.generatesetter.Parameters;
-import com.bruce.intellijplugin.generatesetter.complexreturntype.*;
+import com.bruce.intellijplugin.generatesetter.complexreturntype.ComplexReturnTypeHandler;
+import com.bruce.intellijplugin.generatesetter.complexreturntype.InsertDto;
+import com.bruce.intellijplugin.generatesetter.complexreturntype.ListReturnTypeHandler;
+import com.bruce.intellijplugin.generatesetter.complexreturntype.MapReturnTypeHandler;
+import com.bruce.intellijplugin.generatesetter.complexreturntype.SetReturnTypeHandler;
 import com.bruce.intellijplugin.generatesetter.utils.PsiClassUtils;
 import com.bruce.intellijplugin.generatesetter.utils.PsiDocumentUtils;
 import com.bruce.intellijplugin.generatesetter.utils.PsiToolUtils;
@@ -28,7 +32,17 @@ import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.TextRange;
-import com.intellij.psi.*;
+import com.intellij.psi.PsiClass;
+import com.intellij.psi.PsiDeclarationStatement;
+import com.intellij.psi.PsiDocumentManager;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiFile;
+import com.intellij.psi.PsiJavaFile;
+import com.intellij.psi.PsiLocalVariable;
+import com.intellij.psi.PsiMethod;
+import com.intellij.psi.PsiParameter;
+import com.intellij.psi.PsiType;
+import com.intellij.psi.PsiTypeElement;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.psi.util.PsiTypesUtil;
 import com.intellij.util.IncorrectOperationException;
@@ -36,7 +50,11 @@ import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author bruce ge
@@ -46,7 +64,7 @@ public abstract class GenerateAllSetterBase extends PsiElementBaseIntentionActio
     public static final String GET = "get";
     private final GenerateAllHandler generateAllHandler;
 
-    public GenerateAllSetterBase(GenerateAllHandler generateAllHandler) {
+    GenerateAllSetterBase(GenerateAllHandler generateAllHandler) {
         this.generateAllHandler = generateAllHandler;
     }
 
@@ -73,7 +91,6 @@ public abstract class GenerateAllSetterBase extends PsiElementBaseIntentionActio
             put("char", "\'\'");
             put("java.time.LocalDateTime", "LocalDateTime.now()");
             put("java.time.LocalDate", "LocalDate.now()");
-
         }
     };
 
@@ -129,8 +146,7 @@ public abstract class GenerateAllSetterBase extends PsiElementBaseIntentionActio
     private static Map<String, String> defaultPacakgeValues = new HashMap<String, String>() {
         {
             put("java.sql.Date", "new Date(new java.util.Date().getTime())");
-            put("java.sql.Timestamp",
-                    "new Timestamp(new java.util.Date().getTime())");
+            put("java.sql.Timestamp", "new Timestamp(new java.util.Date().getTime())");
         }
     };
 
@@ -224,8 +240,7 @@ public abstract class GenerateAllSetterBase extends PsiElementBaseIntentionActio
             }
         }
         // TODO: 2017/8/2 what if two class has the same name
-        String insertText = splitText + psiClass.getName() + " " + generateName
-                + " = new " + psiClass.getName() + "();";
+        String insertText = generateBegin(splitText, psiClass.getName(), generateName);
         if (info == null) {
             insertText += generateStringForNoParam(generateName, methods,
                     splitText, importList, hasGuava);
@@ -233,10 +248,44 @@ public abstract class GenerateAllSetterBase extends PsiElementBaseIntentionActio
             insertText += generateStringForParam(generateName, methods,
                     splitText, importList, hasGuava, info);
         }
-        insertText += "return " + generateName + ";";
+        insertText = generateEnding(insertText, generateName);
         dto.setAddedText(insertText);
         dto.setImportList(importList);
         return dto;
+    }
+
+    /**
+     *
+     * @param splitText Tabulator or sth else
+     * @param className Name of the class
+     * @param variableName Name of the generated variable
+     * @return first line of the inserted text
+     */
+    protected String generateBegin(String splitText, String className, String variableName) {
+        return splitText + className + " " + variableName + " = new " + className + "();";
+    }
+
+    /**
+     * This line has or does not have getter inserted into default generated setter method
+     * <br />Examples:
+     * <br />   article.setId(other.getId);
+     * <br />   article.setId();
+     * To modify it, just use String modification
+     * @param setterLine Line to modify
+     * @return modified line
+     */
+    protected String modifySetterLine(String setterLine) {
+        return setterLine;
+    }
+
+    /**
+     *
+     * @param insertText actual value of text to insert. NOTE: This text does not include imports
+     * @param variableName name of the generated variable
+     * @return all text to return
+     */
+    protected String generateEnding(String insertText, String variableName) {
+        return insertText + "return " + variableName + ";";
     }
 
     private String generateStringForParam(String generateName,
@@ -263,8 +312,7 @@ public abstract class GenerateAllSetterBase extends PsiElementBaseIntentionActio
                                 + s.getName() + "()";
                         String startText = generateName + "." + method.getName()
                                 + "(";
-                        builder.append(generateSetterString(setTypeText,
-                                getTypeText, getMethodText, startText));
+                        builder.append(modifySetterLine(generateSetterString(setTypeText, getTypeText, getMethodText, startText)));
                     }
                 } else {
                     generateDefaultForOneMethod(generateName, newImportList,
@@ -386,7 +434,6 @@ public abstract class GenerateAllSetterBase extends PsiElementBaseIntentionActio
         PsiDocumentUtils.commitAndSaveDocument(psiDocumentManager, document);
         PsiToolUtils.addImportToFile(psiDocumentManager,
                 (PsiJavaFile) containingFile, document, newImportList);
-        return;
     }
 
     @NotNull
@@ -396,8 +443,7 @@ public abstract class GenerateAllSetterBase extends PsiElementBaseIntentionActio
         StringBuilder builder = new StringBuilder();
         builder.append(splitText);
         for (PsiMethod method : methodList) {
-            generateDefaultForOneMethod(generateName, newImportList, hasGuava,
-                    builder, method);
+            generateDefaultForOneMethod(generateName, newImportList, hasGuava, builder, method);
             builder.append(splitText);
         }
 
@@ -410,7 +456,7 @@ public abstract class GenerateAllSetterBase extends PsiElementBaseIntentionActio
         PsiParameter[] parameters = method.getParameterList().getParameters();
 
         if (!generateAllHandler.shouldAddDefaultValue()) {
-            builder.append(generateAllHandler.formatLine(generateName + "." + method.getName() + "();"));
+            builder.append(generateAllHandler.formatLine(modifySetterLine(generateName + "." + method.getName() + "();")));
             return;
         }
 
@@ -473,9 +519,7 @@ public abstract class GenerateAllSetterBase extends PsiElementBaseIntentionActio
                         if (s != null) {
                             builder.append(s);
                         } else {
-                            builder.append("new "
-                                    + paramInfo.getParams().get(0).getRealName()
-                                    + "()");
+                            builder.append("new " + paramInfo.getParams().get(0).getRealName() + "()");
                         }
                         newImportList.add(realPackage);
                     }
@@ -570,13 +614,6 @@ public abstract class GenerateAllSetterBase extends PsiElementBaseIntentionActio
         } else {
             return PsiClassUtils.checkClasHasValidGetMethod(psiClass);
         }
-    }
-
-    private static boolean notObjectClass(PsiClass psiClass) {
-        if (psiClass.getQualifiedName().equals("java.lang.Object")) {
-            return false;
-        }
-        return true;
     }
 
     @Nls

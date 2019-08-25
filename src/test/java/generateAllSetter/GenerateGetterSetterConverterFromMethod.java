@@ -12,29 +12,24 @@
  *    along with this program;
  */
 
-package com.bruce.intellijplugin.generatesetter.actions;
+package generateAllSetter;
 
 import com.bruce.intellijplugin.generatesetter.CommonConstants;
-import com.bruce.intellijplugin.generatesetter.GenerateAllHandlerAdapter;
-import org.jetbrains.annotations.NotNull;
+import com.intellij.codeInsight.intention.IntentionAction;
+import org.assertj.core.api.Assertions;
 
 /**
  * @author bruce ge
  */
-public class GenerateSetterGetterFromFunctionAction extends GenerateAllSetterBase {
-    public GenerateSetterGetterFromFunctionAction() {
-        super(new GenerateAllHandlerAdapter(){
-            @Override
-            public boolean isFromMethod() {
-                return true;
-            }
-        });
-    }
+public class GenerateGetterSetterConverterFromMethod extends BaseTest {
+    public void testConverter() {
+        myFixture.configureByText("Article.java", loadBeforeFile(GenerateGetterSetterConverterFromMethod.class, "before/Article.java"));
 
+        IntentionAction singleIntention = myFixture.findSingleIntention(CommonConstants.GENERATE_GETTER_SETTER_CONVERTER_FROM_METHOD);
 
-    @NotNull
-    @Override
-    public String getText() {
-        return CommonConstants.GENERATE_GETTER_SETTER_CONVERTER_FROM_METHOD;
+        Assertions.assertThat(singleIntention).isNotNull();
+        myFixture.launchAction(singleIntention);
+
+        myFixture.checkResultByFile("after/ArticleUsingSetterGetter.java",true);
     }
-}
+ }

@@ -21,9 +21,9 @@ import org.jetbrains.annotations.NotNull;
 /**
  * @author bruce ge
  */
-public class GenerateSetterGetterFromFunctionAction extends GenerateAllSetterBase {
-    public GenerateSetterGetterFromFunctionAction() {
-        super(new GenerateAllHandlerAdapter(){
+public class GenerateSetterGetterUsingWithFromFunctionAction extends GenerateAllSetterBase {
+    public GenerateSetterGetterUsingWithFromFunctionAction() {
+        super(new GenerateAllHandlerAdapter() {
             @Override
             public boolean isFromMethod() {
                 return true;
@@ -35,6 +35,23 @@ public class GenerateSetterGetterFromFunctionAction extends GenerateAllSetterBas
     @NotNull
     @Override
     public String getText() {
-        return CommonConstants.GENERATE_GETTER_SETTER_CONVERTER_FROM_METHOD;
+        return CommonConstants.GENERATE_GETTER_SETTER_USING_WITH_CONVERTER_FROM_METHOD;
+    }
+
+    @Override
+    protected String generateBegin(String splitText, String className, String variableName) {
+        return splitText + "return new " + className + "()";
+    }
+
+    @Override
+    protected String modifySetterLine(String setterLine) {
+        String toBegin = setterLine.substring(setterLine.indexOf("."));
+        return "        .with" + toBegin.substring(4, toBegin.length() - 1);
+    }
+
+    @Override
+    protected String generateEnding(String insertText, String variableName) {
+        int indexOfLastBracket = insertText.lastIndexOf(")") + 1;
+        return insertText.substring(0, indexOfLastBracket) + ";";
     }
 }
